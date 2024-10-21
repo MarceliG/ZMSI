@@ -9,7 +9,7 @@ on:
       - '**'
 
 jobs:
-  lint_and_typecheck:
+  code_quality_checks:
     runs-on: ubuntu-latest
 
     steps:
