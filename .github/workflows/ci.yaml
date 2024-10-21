@@ -12,28 +12,29 @@ jobs:
   lint_and_typecheck:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.12"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
+      - name: Install Poetry
+        uses: sdispater/poetry-action@v1.2
+        with:
+          poetry-version: 'latest'
 
-    - name: Install dependencies
-      run: |
-        poetry install
+      - name: Install dependencies
+        run: |
+          poetry install
 
-    - name: Run Ruff checks
-      run: |
-        poetry run ruff check --diff
-        poetry run ruff format --diff
+      - name: Run Ruff checks
+        run: |
+          poetry run ruff check --diff
+          poetry run ruff format --diff
 
-    - name: Run Mypy type checks
-      run: |
-        poetry run mypy .
+      - name: Run Mypy type checks
+        run: |
+          poetry run mypy .
