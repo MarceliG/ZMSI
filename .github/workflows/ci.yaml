@@ -22,9 +22,8 @@ jobs:
           python-version: "3.12"
 
       - name: Install Poetry
-        uses: sdispater/poetry-action@v1.2
-        with:
-          poetry-version: 'latest'
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
 
       - name: Install dependencies
         run: |
