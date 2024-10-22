@@ -1,5 +1,6 @@
-# ZMSI
-Zastosowanie Metod Sztucznej Inteligencji - ZMSI
+# ZMSI - Zastosowanie Metod Sztucznej Inteligencji
+
+## Setting up the environment
 
 1. `python3 -m venv .venv`
 2. `source .venv/bin/activate`
@@ -8,9 +9,11 @@ Zastosowanie Metod Sztucznej Inteligencji - ZMSI
     - If you want create new `lock` file use command `poetry lock`
 
 ## Comand
-`poetry run ruff check --diff`
-`poetry run ruff format --diff`
-`poetry run mypy .`
+Before pushing any code to a remote repository, check locally if everything is formatted and typed:
+1. `poetry run ruff check --diff`
+2. `poetry run ruff format --diff`
+3. `poetry run mypy .`
 
 Run application:
+
 `poetry run python3 main.py`
