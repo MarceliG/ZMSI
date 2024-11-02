@@ -11,6 +11,7 @@ python = "^3.12"
 pandas = "^2.2.3"
 pytest = "^8.3"
 pytest-cov = "^5.0"
+datasets = "^3.0.1"
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.7.0"
@@ -73,14 +74,17 @@ indent-width = 4
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "E501",     # Ignore long lines (lines exceeding 120 characters).
-    "D100",     # Ignore missing docstring in public modules.
-    "D212",     # Ignore multi-line docstring should start on the first line.
-    "D203",     # Ignore one blank line required before class docstring.
-    "D101",     # Ignore missing docstring in public classes.
-    "D413",     # Ignore missing blank line after last section of a docstring.
     "COM812",   # Ignore trailing comments should have at least two spaces before the `#`.
+    "D100",     # Ignore missing docstring in public modules.
+    "D101",     # Ignore missing docstring in public classes.
+    "D203",     # Ignore one blank line required before class docstring.
+    "D212",     # Ignore multi-line docstring should start on the first line.
+    "D413",     # Ignore missing blank line after last section of a docstring.
+    "E501",     # Ignore long lines (lines exceeding 120 characters).
+    "FA102",    # Checks for uses of PEP 585- and PEP 604-style type annotations
     "ISC001",   # Ignore subprocess.run used without `check=True`.
+    "PTH",      # Ignore Path.
+    "F401",     # Ignore Pyflakes linter.
     ]
 unfixable = ["B"]
 fixable = ["ALL"]
@@ -96,5 +100,5 @@ docstring-code-format = true
 docstring-code-line-length = "dynamic"
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["E402"]
+"__init__.py" = ["E402", "D104"]
 "**/{tests,docs,tools}/*" = ["E402"]
