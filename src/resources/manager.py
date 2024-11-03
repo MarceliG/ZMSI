@@ -1,5 +1,7 @@
 import pandas as pd
-from datasets import Dataset, DatasetDict, concatenate_datasets, load_dataset, load_from_disk
+from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
+
+from src.logs import logger
 
 
 def download_dataset(name: str) -> Dataset:
@@ -12,7 +14,10 @@ def download_dataset(name: str) -> Dataset:
     Returns:
         Dataset: Object containing the downloaded data.
     """
-    return load_dataset(name)
+    logger.info(f"Start downloading the dataset: {name}...")
+    dataset = load_dataset(name)
+    logger.info("Dataset downloaded")
+    return dataset
 
 
 def save_dataset(dataset: Dataset, path: str) -> None:
@@ -23,7 +28,9 @@ def save_dataset(dataset: Dataset, path: str) -> None:
         dataset (Dataset): The dataset object to save.
         path (str): The directory path where the dataset will be saved.
     """
+    logger.info(f"Start saving the dataset on the path: {path}...")
     dataset.save_to_disk(path)
+    logger.info("Dataset saved")
 
 
 def load_dataset_from_path(path: str) -> Dataset:
@@ -36,7 +43,10 @@ def load_dataset_from_path(path: str) -> Dataset:
     Returns:
         Dataset: A dataset object loaded from the specified path.
     """
-    return load_from_disk(path)
+    logger.info(f"Start loading the dataset from the path: {path}...")
+    dataset = load_from_disk(path)
+    logger.info("Dataset loaded")
+    return dataset
 
 
 def combine_datasets(train_df: pd.DataFrame, test_df: pd.DataFrame, validation_df: pd.DataFrame) -> DatasetDict:
@@ -51,8 +61,11 @@ def combine_datasets(train_df: pd.DataFrame, test_df: pd.DataFrame, validation_d
     Returns:
         DatasetDict: A DatasetDict containing all the data from the three DataFrames.
     """
+    logger.info("Start combination dataset (train, test, validation) into DatasetDict...")
     train_dataset = Dataset.from_pandas(train_df)
     test_dataset = Dataset.from_pandas(test_df)
     validation_dataset = Dataset.from_pandas(validation_df)
 
-    return DatasetDict({"train": train_dataset, "test": test_dataset, "validation": validation_dataset})
+    datasetdict = DatasetDict({"train": train_dataset, "test": test_dataset, "validation": validation_dataset})
+    logger.info("combined DatasetDict")
+    return datasetdict
