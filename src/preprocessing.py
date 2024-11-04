@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 from datasets import Dataset
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -114,6 +116,36 @@ def remove_top_n_percent(df: pd.DataFrame, percent: int) -> pd.DataFrame:
     return df[df["text_length"] < cutoff_length].reset_index(drop=True)
 
 
+def filter_repeated_rows(text: str, threshold: int) -> str | None:
+    """
+    Filter texts containing consecutive repeated words.
+
+    Args:
+        text (str): The input text.
+        threshold (int): The minimum number of consecutive repetitions of word.
+
+    Returns:
+        str or None: Returns the original text if it doesn't contain repeated words or returns None to indicate spam.
+    """
+    pattern = re.compile(rf"\b(\w+)\b(?:\s+\1){{{threshold - 1},}}")
+    return None if pattern.search(text) else text
+
+
+def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean the DataFrame by removing whitespace, dropping duplicate texts, and eliminating rows with missing values.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame with a 'text' column.
+
+    Returns:
+        pd.DataFrame: Cleaned DataFrame.
+    """
+    df["text"] = df["text"].str.strip()
+    df = df.drop_duplicates(subset="text")
+    return df.dropna().reset_index(drop=True)
+
+
 def preprocessing(dataset: Dataset) -> Dataset:
     """
     Preprocessing the input dataset.
@@ -149,9 +181,9 @@ def preprocessing(dataset: Dataset) -> Dataset:
     )
 
     # TODO: count how many rows were dropped
-    train_raw = train_raw.drop_duplicates().reset_index(drop=True)
-    test_raw = test_raw.drop_duplicates().reset_index(drop=True)
-    validation_raw = validation_raw.drop_duplicates().reset_index(drop=True)
+    # train_raw = train_raw.drop_duplicates().reset_index(drop=True)
+    # test_raw = test_raw.drop_duplicates().reset_index(drop=True)
+    # validation_raw = validation_raw.drop_duplicates().reset_index(drop=True)
 
     # TODO: count how many rows were dropped
     remove_threshold = 0.8
@@ -174,10 +206,17 @@ def preprocessing(dataset: Dataset) -> Dataset:
     # print(test_removed_top.shape)
     # print(validation_removed_top.shape)
     # print()
+    train_removed_top["text"] = train_removed_top["text"].apply(filter_repeated_rows)
+    test_removed_top["text"] = test_removed_top["text"].apply(filter_repeated_rows)
+    validation_removed_top["text"] = validation_removed_top["text"].apply(filter_repeated_rows)
 
-    mean_length_train = calculate_mean(train_removed_top)
-    mean_length_test = calculate_mean(test_removed_top)
-    mean_length_validation = calculate_mean(validation_removed_top)
+    train_filtered = prepare_data(train_removed_top)
+    test_filtered = prepare_data(test_removed_top)
+    validation_filtered = prepare_data(validation_removed_top)
+
+    mean_length_train = calculate_mean(train_filtered)
+    mean_length_test = calculate_mean(test_filtered)
+    mean_length_validation = calculate_mean(validation_filtered)
 
     # TODO: Add means measurement to data analysis file
     logger.info(f"Średnia długość recenzji w zbiorze treningowym: {mean_length_train:.2f}")
@@ -186,10 +225,10 @@ def preprocessing(dataset: Dataset) -> Dataset:
 
     # Draw filtered histograms
     Plotter.plot_histograms(
-        train_removed_top,
-        test_removed_top,
-        validation_removed_top,
+        train_filtered,
+        test_filtered,
+        validation_filtered,
         FilePath.hitogram_filtered_path,
     )
 
-    return combine_datasets(train_removed_top, test_removed_top, validation_removed_top)
+    return combine_datasets(train_filtered, test_filtered, validation_filtered)

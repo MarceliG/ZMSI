@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Ruff checks
         run: |
-          poetry run ruff check  --unsafe-fixes
+          poetry run ruff check --unsafe-fixes
           poetry run ruff format --diff
 
       - name: Run Mypy type checks
