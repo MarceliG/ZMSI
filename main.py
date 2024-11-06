@@ -1,6 +1,7 @@
 from src.logs import logger
 from src.preprocessing import preprocessing
-from src.resources import FilePath, train_model, download_dataset, load_dataset_from_path, parser, save_dataset
+from src.resources import FilePath, download_dataset, load_dataset_from_path, parser, save_dataset, train_model
+
 
 def main() -> None:
     """Execute The main function."""
