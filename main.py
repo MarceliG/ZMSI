@@ -1,7 +1,6 @@
 from src.logs import logger
 from src.preprocessing import preprocessing
-from src.resources import FilePath, download_dataset, load_dataset_from_path, parser, save_dataset
-
+from src.resources import FilePath, train_model, download_dataset, load_dataset_from_path, parser, save_dataset
 
 def main() -> None:
     """Execute The main function."""
@@ -16,6 +15,9 @@ def main() -> None:
         dataset_raw = load_dataset_from_path(FilePath().datasets_raw)
         dataset_preprocessed = preprocessing(dataset_raw)
         save_dataset(dataset_preprocessed, FilePath().dataset_preprocessed)
+
+    if args.train:
+        train_model(FilePath().dataset_preprocessed)
 
     logger.info("Finish application")
 
