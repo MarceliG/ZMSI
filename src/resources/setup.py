@@ -32,6 +32,13 @@ def parser() -> argparse.Namespace:
         help="Perform data preprocessing.",
     )
 
+    parser.add_argument(
+        "--train",
+        "-t",
+        action="store_true",
+        help="Train the model.",
+    )
+
     # TODO: prepare your code for such situations or similar
     # parser.add_argument(
     #     "--fine-tune",

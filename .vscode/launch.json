@@ -13,7 +13,7 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             },
-            "args": ["--download", "--preprocessing"]
+            "args": ["--download", "--preprocessing", "--train"]
         }
     ]
 }
