@@ -3,8 +3,9 @@ import torch
 from datasets import Dataset
 from transformers import BertForSequenceClassification, BertTokenizer, Trainer, TrainingArguments
 
+from src.config import FilePath
 from src.logs import logger
-from src.resources import FilePath, load_dataset_from_path
+from src.resources import load_dataset_from_path
 
 
 def preprocess_data(dataset: Dataset) -> Dataset:
