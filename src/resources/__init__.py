@@ -6,4 +6,3 @@ from .manager import (
     save_dataset,
 )
 from .plotter import Plotter
-from .train import train_model

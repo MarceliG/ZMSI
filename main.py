@@ -1,7 +1,8 @@
+from src import Train
 from src.config import FilePath, parser
 from src.logs import logger
 from src.preprocessing import preprocessing
-from src.resources import download_dataset, load_dataset_from_path, save_dataset, train_model
+from src.resources import download_dataset, load_dataset_from_path, save_dataset
 
 
 def main() -> None:
@@ -19,7 +20,7 @@ def main() -> None:
         save_dataset(dataset_preprocessed, FilePath.dataset_preprocessed)
 
     if args.train:
-        train_model(FilePath.dataset_preprocessed)
+        Train(dataset_path=FilePath.dataset_preprocessed).train_model()
 
     logger.info("Finish application")
 
