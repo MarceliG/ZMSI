@@ -5,8 +5,9 @@ from datasets import Dataset
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from src.config import FilePath
 from src.logs import logger
-from src.resources import FilePath, Plotter, combine_datasets, download_dataset
+from src.resources import Plotter, combine_datasets, save_dataframe_as_markdown
 
 
 def split_datasets(dataset: Dataset) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -35,7 +36,7 @@ def calculate_mean(df: pd.DataFrame) -> float:
     Returns:
         float: The average length of the text entries in the dataset.
     """
-    return df["text_length"].mean()
+    return round(df["text_length"].mean(), 2)
 
 
 def calculate_std(df: pd.DataFrame) -> float:
@@ -48,7 +49,7 @@ def calculate_std(df: pd.DataFrame) -> float:
     Returns:
         float: The average length of the text entries in the dataset.
     """
-    return df["text_length"].std()
+    return round(df["text_length"].std(), 2)
 
 
 def remove_similar_rows(df: pd.DataFrame, threshold: float = 0.8) -> pd.DataFrame:
@@ -131,19 +132,48 @@ def filter_repeated_rows(text: str, threshold: int) -> str | None:
     return None if pattern.search(text) else text
 
 
-def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
+def create_statistics_dataframe() -> pd.DataFrame:
     """
-    Clean the DataFrame by removing whitespace, dropping duplicate texts, and eliminating rows with missing values.
-
-    Args:
-        df (pd.DataFrame): Input DataFrame with a 'text' column.
+    Create dataframe with bacis columns.
 
     Returns:
-        pd.DataFrame: Cleaned DataFrame.
+        pd.DataFrame: A dataframe with colums: mean, std and row_count.
     """
-    df["text"] = df["text"].str.strip()
-    df = df.drop_duplicates(subset="text")
-    return df.dropna().reset_index(drop=True)
+    return pd.DataFrame(
+        columns=[
+            "mean_text_length",
+            "std_text_length",
+            "row_count",
+        ],
+        index=["train", "test", "validation"],
+    )
+
+
+def basic_statistics(
+    statistics_df: pd.DataFrame, train: pd.DataFrame, test: pd.DataFrame, validation: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """
+    Add basic statistical to a DataFrame.
+
+    The function calculates the following statistics for the given train, test, and validation datasets:
+    - Mean text length
+    - Standard deviation of text length
+    - Row count
+
+    Args:
+        statistics_df (pd.DataFrame): A DataFrame that will be updated with the calculated statistics.
+        train (pd.DataFrame): The training dataset.
+        test (pd.DataFrame): The testing dataset.
+        validation (pd.DataFrame): The validation dataset.
+
+    Returns:
+        tuple: A tuple containing the updated train, test, and validation DataFrames.
+    """
+    statistics_df["mean_text_length"] = [calculate_mean(df) for df in (train, test, validation)]
+    statistics_df["std_text_length"] = [calculate_std(df) for df in (train, test, validation)]
+    statistics_df["row_count"] = [df.shape[0] for df in (train, test, validation)]
+
+    return train, test, validation
 
 
 def preprocessing(dataset: Dataset) -> Dataset:
@@ -161,74 +191,49 @@ def preprocessing(dataset: Dataset) -> Dataset:
     Returns:
         Dataset: A combined dataset after processing, containing training, testing, and validation data.
     """
-    train_raw, test_raw, validation_raw = split_datasets(dataset)
+    statistic_before = create_statistics_dataframe()
+    statistic_during = pd.DataFrame()
+    statistic_after = create_statistics_dataframe()
 
-    train_raw = count_words(train_raw)
-    test_raw = count_words(test_raw)
-    validation_raw = count_words(validation_raw)
+    train, test, validation = split_datasets(dataset)
 
-    # TODO: Add raw shape measurement to data analysis file
-    # print(train_raw.shape)
-    # print(test_raw.shape)
-    # print(validation_raw.shape)
-    # print()
+    train, test, validation = [count_words(df) for df in (train, test, validation)]
+
+    train, test, validation = basic_statistics(statistic_before, train, test, validation)
+    save_dataframe_as_markdown(statistic_before, FilePath.statistic_before_preprocessing_path)
+
     # Draw raw histograms
-    Plotter.plot_histograms(
-        train_raw,
-        test_raw,
-        validation_raw,
-        FilePath.hitogram_raw_path,
-    )
+    Plotter.plot_histograms(train, test, validation, FilePath.histogram_raw_path)
 
-    # TODO: count how many rows were dropped
-    # train_raw = train_raw.drop_duplicates().reset_index(drop=True)
-    # test_raw = test_raw.drop_duplicates().reset_index(drop=True)
-    # validation_raw = validation_raw.drop_duplicates().reset_index(drop=True)
+    # drop duplicates
+    train, test, validation = [df.drop_duplicates().reset_index(drop=True) for df in (train, test, validation)]
+    statistic_during["row_count_after_drop_duplicates"] = [df.shape[0] for df in (train, test, validation)]
 
-    # TODO: count how many rows were dropped
-    remove_threshold = 0.8
-    train_removed_similarities = remove_similar_rows(train_raw, threshold=remove_threshold)
-    test_removed_similarities = remove_similar_rows(test_raw, threshold=remove_threshold)
-    validation_removed_similarities = remove_similar_rows(validation_raw, threshold=remove_threshold)
+    # Remove similar rows
+    train, test, validation = [remove_similar_rows(df, threshold=0.8) for df in (train, test, validation)]
+    statistic_during["row_count_after_remove_similar_rows"] = [df.shape[0] for df in (train, test, validation)]
 
-    # print(train_removed_similarities.shape)
-    # print(test_removed_similarities.shape)
-    # print(validation_removed_similarities.shape)
-    # print()
+    # Remove the longest lines (top 2%)
+    train, test, validation = [remove_top_n_percent(df, 2) for df in (train, test, validation)]
+    statistic_during["row_count_after_remove_top_n_percent"] = [df.shape[0] for df in (train, test, validation)]
 
-    # TODO: count how many rows were dropped
-    top_n_percetage = 2
-    train_removed_top = remove_top_n_percent(train_removed_similarities, top_n_percetage)
-    test_removed_top = remove_top_n_percent(test_removed_similarities, top_n_percetage)
-    validation_removed_top = remove_top_n_percent(validation_removed_similarities, top_n_percetage)
+    # Filters for repeating words
+    train, test, validation = [
+        df.assign(text=df["text"].apply(lambda x: filter_repeated_rows(x, 3))) for df in (train, test, validation)
+    ]
+    statistic_during["row_count_after_filter_repeated_rows"] = [df.shape[0] for df in (train, test, validation)]
 
-    # print(train_removed_top.shape)
-    # print(test_removed_top.shape)
-    # print(validation_removed_top.shape)
-    # print()
-    train_removed_top["text"] = train_removed_top["text"].apply(filter_repeated_rows)
-    test_removed_top["text"] = test_removed_top["text"].apply(filter_repeated_rows)
-    validation_removed_top["text"] = validation_removed_top["text"].apply(filter_repeated_rows)
+    # Remove None rows
+    train, test, validation = [df.dropna().reset_index(drop=True) for df in (train, test, validation)]
 
-    train_filtered = prepare_data(train_removed_top)
-    test_filtered = prepare_data(test_removed_top)
-    validation_filtered = prepare_data(validation_removed_top)
+    # Clean rows
+    train["text"], test["text"], validation["text"] = [df["text"].str.strip() for df in (train, test, validation)]
 
-    mean_length_train = calculate_mean(train_filtered)
-    mean_length_test = calculate_mean(test_filtered)
-    mean_length_validation = calculate_mean(validation_filtered)
+    statistic_during["row_count_after_drop_NaN"] = [df.shape[0] for df in (train, test, validation)]
+    save_dataframe_as_markdown(statistic_during, FilePath.statistic_during_preprocessing_path)
 
-    # TODO: Add means measurement to data analysis file
-    logger.info(f"Średnia długość recenzji w zbiorze treningowym: {mean_length_train:.2f}")
-    logger.info(f"Średnia długość recenzji w zbiorze testowym: {mean_length_test:.2f}")
-    logger.info(f"Średnia długość recenzji w zbiorze walidacyjnym: {mean_length_validation:.2f}")
+    train, test, validation = basic_statistics(statistic_after, train, test, validation)
+    save_dataframe_as_markdown(statistic_after, FilePath.statistic_after_preprocessing_path)
+    Plotter.plot_histograms(train, test, validation, FilePath.histogram_filtered_path)
 
-    # Draw filtered histograms
-    Plotter.plot_histograms(
-        train_filtered,
-        test_filtered,
-        validation_filtered,
-        FilePath.hitogram_filtered_path,
-    )
-
-    return combine_datasets(train_filtered, test_filtered, validation_filtered)
+    return combine_datasets(train, test, validation)

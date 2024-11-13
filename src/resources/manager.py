@@ -1,6 +1,9 @@
+import os
+
 import pandas as pd
 from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
 
+from src.config import FilePath
 from src.logs import logger
 
 
@@ -69,3 +72,14 @@ def combine_datasets(train_df: pd.DataFrame, test_df: pd.DataFrame, validation_d
     datasetdict = DatasetDict({"train": train_dataset, "test": test_dataset, "validation": validation_dataset})
     logger.info("combined DatasetDict")
     return datasetdict
+
+
+def save_dataframe_as_markdown(statistics_df: pd.DataFrame, filename: str) -> None:
+    """
+    Save a DataFrame as a Markdown table in a specified file.
+
+    Args:
+        statistics_df (pd.DataFrame): The DataFrame containing the statistics to be saved.
+        filename (str): The name of the file (including extension).
+    """
+    statistics_df.to_markdown(os.path.join(FilePath.statistics, filename))
