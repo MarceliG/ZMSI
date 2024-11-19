@@ -16,7 +16,7 @@ datasets = "^3.0.1"
 scikit-learn = "^1.5.2"
 tabulate = "^0.9.0"
 torch = "^2.1.0"
-transformers = "^4.45.2"
+transformers = {version = "^4.45.2", extras = ["torch"]}
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.7.0"
@@ -30,12 +30,15 @@ build-backend = "poetry.core.masonry.api"
 mypy_path = "src"
 ignore_missing_imports = true
 allow_redefinition = true
-disallow_untyped_defs = false
+disallow_untyped_defs = true
+disable_error_code = ["var-annotated"]
 
 [tool.ruff]
+src = ["src"]
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
+    "builtins.pyi",
     ".direnv",
     ".eggs",
     ".git",
@@ -71,21 +74,24 @@ indent-width = 4
 select = ["ALL"]
 ignore = [
     "COM812",   # Ignore trailing comments should have at least two spaces before the `#`.
+    "G004",     # Allow using of f-strings to format logging messages
     "D100",     # Ignore missing docstring in public modules.
     "D101",     # Ignore missing docstring in public classes.
     "D203",     # Ignore one blank line required before class docstring.
     "D212",     # Ignore multi-line docstring should start on the first line.
     "D413",     # Ignore missing blank line after last section of a docstring.
     "E501",     # Ignore long lines (lines exceeding 120 characters).
-    "FA102",    # Checks for uses of PEP 585- and PEP 604-style type annotations.
-    "ISC001",   # Ignore subprocess.run used without `check=True`.
-    "PTH",      # Ignore Path.
-    "PD901",    # Derived from the pandas-vet linter.
-    "PD002",    # Allow using inplace=True.
-    "TD",       # Ignore missing-todo informations
-    "FIX002",   # Ignore contains todo.
     "ERA001",   # Ignore commented a few lines.
+    "FA102",    # Checks for uses of PEP 585- and PEP 604-style type annotations.
+    "FBT",      # Flake8-boolean-trap 
+    "FIX002",   # Ignore contains todo.
+    "ISC001",   # Ignore subprocess.run used without `check=True`.
+    "PD002",    # Allow using inplace=True.
+    "PD901",    # Derived from the pandas-vet linter.
+    "PLR0913",  # To many arguments.
     "PLR2004",  # Allow magic value comparison.
+    "PTH",      # Ignore Path.
+    "TD",       # Ignore missing-todo informations.
     ]
 unfixable = ["B"]
 fixable = ["ALL"]
