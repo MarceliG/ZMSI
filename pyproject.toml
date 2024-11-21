@@ -73,6 +73,7 @@ indent-width = 4
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+    "ANN204",   # Ignore return value in __init__
     "COM812",   # Ignore trailing comments should have at least two spaces before the `#`.
     "G004",     # Allow using of f-strings to format logging messages
     "D100",     # Ignore missing docstring in public modules.

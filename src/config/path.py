@@ -13,14 +13,20 @@ class FilePath:
     results = os.path.join(data_path, "results")
     classification_report = os.path.join(results, "classification_reports")
     statistics = os.path.join(data_path, "statistics")
+    statistics_before = os.path.join(statistics, "statistics_before")
+    statistics_during = os.path.join(statistics, "statistics_during")
+    statistics_after = os.path.join(statistics, "statistics_after")
 
     # files
     histogram_raw_path = os.path.join(plots, "histograms_raw.png")
     histogram_filtered_path = os.path.join(plots, "histograms_filtered.png")
 
-    statistic_before_preprocessing_path = os.path.join(statistics, "before_preprocessing.md")
-    statistic_during_preprocessing_path = os.path.join(statistics, "during_preprocessing.md")
-    statistic_after_preprocessing_path = os.path.join(statistics, "after_preprocessing.md")
+    statistic_before_preprocessing_path = os.path.join(statistics_before, "before.md")
+    statistic_during_preprocessing_path = os.path.join(statistics_during, "during.md")
+    statistic_after_preprocessing_path = os.path.join(statistics_after, "after.md")
+
+    statistic_rating_before_preprocessing_path = os.path.join(statistics_before, "rating.md")
+    statistic_rating_after_preprocessing_path = os.path.join(statistics_after, "rating.md")
 
     train_raw_rating_value_counts = os.path.join(statistics, "train_raw_rating_value_counts.md")
     test_raw_rating_value_counts = os.path.join(statistics, "test_raw_rating_value_counts.md")
@@ -45,6 +51,9 @@ class FilePath:
         results,
         classification_report,
         statistics,
+        statistics_before,
+        statistics_during,
+        statistics_after,
     ]:
         if not os.path.exists(directory):
             os.makedirs(directory)
