@@ -176,6 +176,46 @@ def basic_statistics(
     return train, test, validation
 
 
+def count_rating(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Count unique value in the 'rating' column.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame containing a 'rating' column.
+
+    Returns:
+        pd.DataFrame: A DataFrame with 'rating' The count of unique value, sorted in descending order.
+    """
+    counts_df = df["rating"].value_counts().reset_index()
+    return counts_df.sort_values(by="rating", ascending=False).reset_index(drop=True)
+
+
+def split_dataset_by_half(df: pd.DataFrame, rating_col: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Split the input DataFrame into two DataFrames by dividing each group of rows into halves.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame to be split.
+        rating_col (str): The column name used to group rows before splitting.
+
+    Returns:
+        tuple[*pd.DataFrame]: Two DataFrames with approximately equal distribution of rows per group.
+    """
+    df1_groups = []
+    df2_groups = []
+
+    for _, group in df.groupby(rating_col):
+        half = len(group) // 2
+
+        df1_groups.append(group.iloc[:half])
+        df2_groups.append(group.iloc[half:])
+
+    df1 = pd.concat(df1_groups).sample(frac=1, random_state=42).reset_index(drop=True)
+    df2 = pd.concat(df2_groups).sample(frac=1, random_state=42).reset_index(drop=True)
+
+    return df1, df2
+
+
 def preprocessing(dataset: Dataset) -> Dataset:
     """
     Preprocessing the input dataset.
@@ -196,6 +236,22 @@ def preprocessing(dataset: Dataset) -> Dataset:
     statistic_after = create_statistics_dataframe()
 
     train, test, validation = split_datasets(dataset)
+
+    train_raw_rating, test_raw_rating, validation_raw_rating = [count_rating(df) for df in (train, test, validation)]
+
+    save_dataframe_as_markdown(train_raw_rating, FilePath.train_raw_rating_value_counts)
+    save_dataframe_as_markdown(test_raw_rating, FilePath.test_raw_rating_value_counts)
+    save_dataframe_as_markdown(validation_raw_rating, FilePath.validation_raw_rating_value_counts)
+
+    test, validation = split_dataset_by_half(validation, "rating")
+
+    train_after_spliting_rating, test_after_spliting_rating, validation_after_spliting_rating = [
+        count_rating(df) for df in (train, test, validation)
+    ]
+
+    save_dataframe_as_markdown(train_after_spliting_rating, FilePath.train_after_spliting_rating_value_counts)
+    save_dataframe_as_markdown(test_after_spliting_rating, FilePath.test_after_spliting_rating_value_counts)
+    save_dataframe_as_markdown(validation_after_spliting_rating, FilePath.validation_after_spliting_rating_value_counts)
 
     train, test, validation = [count_words(df) for df in (train, test, validation)]
 

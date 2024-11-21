@@ -11,6 +11,7 @@ class FilePath:
     models = os.path.join(data_path, "models")
     plots = os.path.join(data_path, "plots")
     results = os.path.join(data_path, "results")
+    classification_report = os.path.join(results, "classification_reports")
     statistics = os.path.join(data_path, "statistics")
 
     # files
@@ -21,6 +22,18 @@ class FilePath:
     statistic_during_preprocessing_path = os.path.join(statistics, "during_preprocessing.md")
     statistic_after_preprocessing_path = os.path.join(statistics, "after_preprocessing.md")
 
+    train_raw_rating_value_counts = os.path.join(statistics, "train_raw_rating_value_counts.md")
+    test_raw_rating_value_counts = os.path.join(statistics, "test_raw_rating_value_counts.md")
+    validation_raw_rating_value_counts = os.path.join(statistics, "validation_raw_rating_value_counts.md")
+
+    train_after_spliting_rating_value_counts = os.path.join(statistics, "train_after_spliting_rating_value_counts.md")
+    test_after_spliting_rating_value_counts = os.path.join(statistics, "test_after_spliting_rating_value_counts.md")
+    validation_after_spliting_rating_value_counts = os.path.join(
+        statistics, "validation_after_spliting_rating_value_counts.md"
+    )
+
+    classification_report_path = os.path.join(classification_report, "classification_report.md")
+
     # Create neccesery folders
     for directory in [
         data_path,
@@ -30,6 +43,7 @@ class FilePath:
         dataset_preprocessed,
         plots,
         results,
+        classification_report,
         statistics,
     ]:
         if not os.path.exists(directory):
