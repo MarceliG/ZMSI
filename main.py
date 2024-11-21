@@ -1,8 +1,15 @@
-from src import Tokenizer, TrainerModel
-from src.config import FilePath, parser
-from src.logs import logger
-from src.preprocessing import preprocessing
-from src.resources import download_dataset, load_dataset_from_path, load_model_from_disc, save_dataset
+from src import (
+    DatasetPreprocessor,
+    FilePath,
+    Tokenizer,
+    TrainerModel,
+    download_dataset,
+    load_dataset_from_path,
+    load_model_from_disc,
+    logger,
+    parser,
+    save_dataset,
+)
 
 
 def main() -> None:
@@ -16,7 +23,8 @@ def main() -> None:
 
     if args.preprocessing:
         dataset_raw = load_dataset_from_path(FilePath.datasets_raw)
-        dataset_preprocessed = preprocessing(dataset_raw)
+        preprocessor = DatasetPreprocessor(dataset_raw)
+        dataset_preprocessed = preprocessor.preprocess()
         save_dataset(dataset_preprocessed, FilePath.dataset_preprocessed)
 
     if args.train:
