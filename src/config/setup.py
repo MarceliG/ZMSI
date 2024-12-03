@@ -39,19 +39,11 @@ def parser() -> argparse.Namespace:
         help="Train the model.",
     )
 
-    # TODO: prepare your code for such situations or similar
-    # parser.add_argument(
-    #     "--fine-tune",
-    #     "-ft",
-    #     type=str,
-    #     help="Path to the data for model fine-tuning.",
-    # )
-
-    # parser.add_argument(
-    #     "--predict",
-    #     "-pr",
-    #     type=str,
-    #     help="Path to the input data for prediction.",
-    # )
+    parser.add_argument(
+        "--evaluate",
+        "-e",
+        action="store_true",
+        help="Evaluate the model.",
+    )
 
     return parser.parse_args()

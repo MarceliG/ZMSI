@@ -31,7 +31,7 @@ def main() -> None:
         dataset = load_dataset_from_path(FilePath.dataset_preprocessed)
         tokenizer = Tokenizer()
 
-        max_length = 128
+        max_length = 512
         tokenized_train_dataset = tokenizer.tokenize(dataset["train"], max_length=max_length)  # 512 za długo się uczy
         tokenized_test_dataset = tokenizer.tokenize(dataset["test"], max_length=max_length)  # 512 za długo się uczy
         tokenized_validation_dataset = tokenizer.tokenize(
@@ -43,12 +43,18 @@ def main() -> None:
             tokenized_validation_dataset=tokenized_validation_dataset,
             model_path_to_save=FilePath.models,
             num_labels=5,
-            epoch=5,
+            epoch=10,
             batch_size=8,
-            gradient_accumulation_steps=2,
             learning_rate=5e-5,
         )
+
+    if args.evaluate:
+        dataset = load_dataset_from_path(FilePath.dataset_preprocessed)
+        tokenizer = Tokenizer()
         model = load_model_from_disc(FilePath.models)
+        max_length = 512
+        tokenized_test_dataset = tokenizer.tokenize(dataset["test"], max_length=max_length)
+        trainer = TrainerModel()
         trainer.evaluate_trained_model(
             model,
             tokenized_dataset=tokenized_test_dataset,
