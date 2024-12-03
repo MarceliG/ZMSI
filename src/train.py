@@ -39,7 +39,6 @@ class TrainerModel:
         num_labels: int = 5,
         epoch: int = 3,
         batch_size: int = 8,
-        gradient_accumulation_steps: int = 2,
         learning_rate: float = 5e-5,
     ) -> None:
         """
@@ -52,7 +51,6 @@ class TrainerModel:
             num_labels (int): Number of unique labels (classes) for classification. Defaults to 5.
             epoch (int): Number of training epochs. Defaults to 3.
             batch_size (int): Batch size per device during training. Defaults to 8.
-            gradient_accumulation_steps (int): Number of steps to accumulate gradients
                 before performing a backward/update pass. Defaults to 2.
             learning_rate (float): The learning rate used by the optimizer to update model weights during training.
                 It controls how big each step will be in the gradient descent process. Typical values are in the range
@@ -75,13 +73,12 @@ class TrainerModel:
             output_dir=FilePath.results,
             num_train_epochs=epoch,
             per_device_train_batch_size=batch_size,
-            gradient_accumulation_steps=gradient_accumulation_steps,
             learning_rate=learning_rate,
             fp16=torch.cuda.is_available(),
             logging_steps=100,
-            save_steps=500,
+            save_steps=100,
             eval_strategy="steps",
-            eval_steps=500,
+            eval_steps=100,
         )
 
         # Train the model
@@ -145,7 +142,14 @@ class TrainerModel:
                 all_predictions.extend(predictions.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
 
-        report = classification_report(all_labels, all_predictions, digits=4, output_dict=True)
+        report = classification_report(
+            all_labels,
+            all_predictions,
+            digits=4,
+            output_dict=True,
+            # zero_division=1,
+        )
         report_df = pd.DataFrame(report).transpose()
         report_df.to_markdown(result_path_to_save)
-        logger.info("Classification Report:\n", report_df)
+        logger.info("Classification Report:")
+        logger.info(report_df)

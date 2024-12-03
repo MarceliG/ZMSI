@@ -171,6 +171,29 @@ class DatasetPreprocessor:
 
         return df_cleaned, removed_count
 
+    def _undersampling(self, df: pd.DataFrame, target_column: str) -> tuple[pd.DataFrame, int]:
+        """
+        Perform undersampling by balancing the dataset based on the least frequent class.
+
+        Args:
+            df (pd.DataFrame): Input DataFrame containing a target column.
+            target_column (str): Name of the column containing class labels.
+
+        Returns:
+            tuple: A DataFrame after undersampling and the number of removed rows.
+        """
+        class_counts = df[target_column].value_counts()
+        min_class_count = class_counts.min()
+
+        df_balanced = (
+            df.groupby(target_column)
+            .apply(lambda group: group.sample(n=min_class_count, random_state=42))
+            .reset_index(drop=True)
+        )
+
+        removed_count = len(df) - len(df_balanced)
+        return df_balanced, removed_count
+
     def _create_statistics_rating_dataframe(self) -> pd.DataFrame:
         """
         Create dataframe with rating columns.
@@ -199,7 +222,14 @@ class DatasetPreprocessor:
             pd.DataFrame: A dataframe with colums: mean, std and row_count.
         """
         return pd.DataFrame(
-            columns=["remove_nan", "remove_duplicates", "remove_similarities", "remove_longest_texts", "remove_spam"],
+            columns=[
+                "remove_nan",
+                "remove_duplicates",
+                "remove_similarities",
+                "remove_longest_texts",
+                "remove_spam",
+                "undersampling",
+            ],
             index=["train", "test", "validation"],
         )
 
@@ -370,6 +400,15 @@ class DatasetPreprocessor:
             (self.validation, removed_count_validation),
         ) = [self._filter_repeated(df, threshold=3) for df in (self.train, self.test, self.validation)]
         self._update_statistics_during("remove_spam", removed_count_train, removed_count_test, removed_count_validation)
+
+        (
+            (self.train, removed_count_train),
+            (self.test, removed_count_test),
+            (self.validation, removed_count_validation),
+        ) = [self._undersampling(df, target_column="rating") for df in (self.train, self.test, self.validation)]
+        self._update_statistics_during(
+            "undersampling", removed_count_train, removed_count_test, removed_count_validation
+        )
 
         save_dataframe_as_markdown(self.statistics_during, FilePath.statistic_during_preprocessing_path)
 
