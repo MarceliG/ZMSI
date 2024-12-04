@@ -3,6 +3,68 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h2>Welcome to My App</h2>
-    <p>Hello, world. xd You're at the polls index.</p>
+    <!-- Title -->
+    <div class="row">
+        <div class="col-12 col-md-8 mx-auto">
+            <h1 class="h2 text-center text-white py-5">
+                Wieszak na ubrania ścienny klucze kurtki do przedpokoju na ścianę czarny
+            </h1>
+        </div>
+    </div>
+
+    <!-- Image -->
+    <div class="w-100 d-flex justify-content-center">
+        {% load static %}
+        <img src="{% static 'img/wieszak2.png' %}" class="img-fluid image-responsive" alt="...">
+    </div>
+
+    <!-- About -->
+    <div class="py-5 text-white">
+        <h2 class="h3 text-white">Opis</h2>
+         <p>
+            Wieszak na klucze to obowiązkowy element wyposażenia każdego domu i mieszkania! Nadaje się nie tylko na klucze, ale też na ubrania, 
+            biżuterię i inne przedmioty codziennego użytku. W ten sposób pozostaniesz zorganizowany niezależnie od tego, czy idziesz do pracy, 
+            czy na spacer po parku. Wszystkie najpotrzebniejsze rzeczy będą w jednym miejscu i unikniesz szukania ich w pośpiechu przed wyjściem z domu. 
+            Już nigdy nie zapomnisz, gdzie odłożyłeś klucze, płaszcz lub smycz swojego czworonoga!
+        </p>
+    </div>
+
+    <!-- Comments -->
+    <div>
+        <h2 class="h3 text-white">Komentarze</h2>
+
+        <div class="form-floating">
+            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+            <label for="floatingTextarea" class="text-dark">Dodaj komentarz</label>
+            <button class="btn btn-secondary mt-2">Dodaj</button>
+        </div>
+
+        <div id="all_comments" class="mt-5 mb-5 px-2">
+            <div class="row bg-light text-dark py-2 rounded">
+                <div class="col-10">
+                    <p>Test</p>
+                </div>
+
+                <div class="col-2">
+                    <div class="star-rate star-rating text-dark">
+                        <input type="radio" disabled id="star5" name="rating" value="5">
+                        <label for="star5" title="5 stars">★</label>
+                
+                        <input type="radio" disabled id="star4" name="rating" value="4">
+                        <label for="star4" title="4 stars">★</label>
+                
+                        <input type="radio" checked disabled id="star3" name="rating" value="3">
+                        <label for="star3" title="3 stars">★</label>
+                
+                        <input type="radio" disabled id="star2" name="rating" value="2">
+                        <label for="star2" title="2 stars">★</label>
+                
+                        <input type="radio" disabled id="star1" name="rating" value="1">
+                        <label for="star1" title="1 star">★</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
 {% endblock %}
