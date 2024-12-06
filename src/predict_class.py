@@ -49,4 +49,4 @@ def predict_class(
         predictions = torch.argmax(outputs.logits, dim=-1)
 
     # Return the predicted class
-    return predictions.item()
+    return int(predictions.item())
