@@ -6,8 +6,8 @@ from datasets import Dataset
 from sklearn.metrics import classification_report
 from torch.utils.data import DataLoader
 from transformers import (
-    BertForSequenceClassification,
-    BertTokenizer,
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
     DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
@@ -59,7 +59,7 @@ class TrainerModel:
         logger.info("Start training model")
 
         # Initialize the model
-        model = BertForSequenceClassification.from_pretrained(
+        model = AutoModelForSequenceClassification.from_pretrained(
             self.model_name,
             num_labels=num_labels,
         )
@@ -73,12 +73,18 @@ class TrainerModel:
             output_dir=FilePath.results,
             num_train_epochs=epoch,
             per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=batch_size,
             learning_rate=learning_rate,
-            fp16=torch.cuda.is_available(),
+            fp16=False,
             logging_steps=100,
             save_steps=100,
-            eval_strategy="steps",
+            eval_strategy="epoch",
+            save_strategy="epoch",
             eval_steps=100,
+            save_total_limit=2,
+            load_best_model_at_end=True,
+            metric_for_best_model="eval_loss",
+            greater_is_better=False,
         )
 
         # Train the model
@@ -97,7 +103,7 @@ class TrainerModel:
 
     def evaluate_trained_model(
         self,
-        model: BertForSequenceClassification,
+        model: AutoModelForSequenceClassification,
         tokenized_dataset: Dataset,
         result_path_to_save: str,
         batch_size: int = 8,
@@ -117,7 +123,7 @@ class TrainerModel:
         model.to(device)
         model.eval()
         data_collator = DataCollatorWithPadding(
-            tokenizer=BertTokenizer.from_pretrained(self.model_name), return_tensors="pt"
+            tokenizer=AutoTokenizer.from_pretrained(self.model_name), return_tensors="pt"
         )
         dataloader = DataLoader(
             tokenized_dataset,
@@ -147,9 +153,9 @@ class TrainerModel:
             all_predictions,
             digits=4,
             output_dict=True,
-            # zero_division=1,
         )
         report_df = pd.DataFrame(report).transpose()
         report_df.to_markdown(result_path_to_save)
         logger.info("Classification Report:")
         logger.info(report_df)
+

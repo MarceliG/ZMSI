@@ -28,35 +28,36 @@ def main() -> None:
         save_dataset(dataset_preprocessed, FilePath.dataset_preprocessed)
 
     if args.train or args.evaluate:
-        dataset = load_dataset_from_path(FilePath.dataset_preprocessed)
+        loaded_dataset = load_dataset_from_path(FilePath.dataset_preprocessed)
         max_length = 512
-        batch_size = 8
-        tokenizer = Tokenizer()
-        trainer = TrainerModel()
+        batch_size = 64
+        model_name = "distilbert/distilbert-base-uncased"
+        tokenizer = Tokenizer(model_name)
+        trainer = TrainerModel(model_name)
 
-        tokenized_train_dataset = tokenizer.tokenize(dataset["train"], max_length=max_length)
-        tokenized_test_dataset = tokenizer.tokenize(dataset["test"], max_length=max_length)
-        tokenized_validation_dataset = tokenizer.tokenize(dataset["validation"], max_length=max_length)
+        tokenized_train_dataset = tokenizer.tokenize(loaded_dataset["train"], max_length=max_length)
+        tokenized_test_dataset = tokenizer.tokenize(loaded_dataset["test"], max_length=max_length)
+        tokenized_validation_dataset = tokenizer.tokenize(loaded_dataset["validation"], max_length=max_length)
 
     if args.train:
         trainer.train(
             tokenized_train_dataset=tokenized_train_dataset,
             tokenized_validation_dataset=tokenized_validation_dataset,
-            model_path_to_save=FilePath.models,
-            num_labels=5,
+            model_path_to_save=FilePath.model_2_classes,
+            num_labels=2,
             epoch=10,
             batch_size=batch_size,
-            learning_rate=5e-5,
+            learning_rate=2e-5,
         )
 
     if args.evaluate:
-        model = load_model_from_disc(FilePath.models)
+        model = load_model_from_disc(FilePath.model_2_classes)
 
         trainer.evaluate_trained_model(
             model,
             tokenized_dataset=tokenized_test_dataset,
             result_path_to_save=FilePath.classification_report_path,
-            batch_size=batch_size,
+            batch_size=8,
         )
 
     logger.info("Finish application")
