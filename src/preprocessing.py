@@ -335,6 +335,24 @@ class DatasetPreprocessor:
 
         self.statistic_rating = combined_df.sort_values(by="rating", ascending=False).reset_index(drop=True)
 
+    def _change_ratings(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Modify the values in the 'rating' column of the given DataFrame.
+
+        Conversion logic:
+            - Ratings of 5, 4, or 3 are changed to 1 (positive sentiment).
+            - Ratings of 2 or 1 are changed to 0 (negative sentiment).
+
+        Args:
+            df (pd.DataFrame): A DataFrame containing a 'rating' column with integer values.
+
+        Returns:
+            pd.DataFrame: A new DataFrame with updated 'rating' values.
+        """
+        df = df.copy()
+        df["rating"] = df["rating"].apply(lambda rating: 0 if rating in [2, 1] else 1)
+        return df
+
     def preprocess(self) -> Dataset:
         """
         Preprocessing the input dataset.
@@ -419,4 +437,11 @@ class DatasetPreprocessor:
 
         save_dataframe_as_markdown(self.statistics_before, FilePath.statistic_after_preprocessing_path)
         Plotter.plot_histograms(self.train, self.test, self.validation, FilePath.histogram_filtered_path)
+
+        self.train = self._change_ratings(self.train)
+        self.test = self._change_ratings(self.test)
+        self.validation = self._change_ratings(self.validation)
+        self._update_statistic_rating()
+        save_dataframe_as_markdown(self.statistic_rating, FilePath.statistic_rating_after_change_label_path)
+
         return combine_datasets(self.train, self.test, self.validation)

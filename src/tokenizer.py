@@ -1,6 +1,6 @@
 import pandas as pd
 from datasets import Dataset
-from transformers import BertTokenizer
+from transformers import AutoTokenizer
 
 from src.logs import logger
 
@@ -14,7 +14,7 @@ class Tokenizer:
             model_name (str): Name of the pre-trained model for tokenization.
                 Defaults to 'bert-base-uncased'.
         """
-        self.tokenization = BertTokenizer.from_pretrained(model_name)
+        self.tokenization = AutoTokenizer.from_pretrained(model_name)
 
     def tokenize(
         self,
@@ -49,8 +49,6 @@ class Tokenizer:
                 "labels": dataset["rating"],
             }
         )
-        logger.info("Convert classes from [1,5] to [0,4]")
-        # The model expects labels to start from 0 (e.g., for 5 classes, labels should be in the range [0, 4]).
-        tokenized_df["labels"] = tokenized_df["labels"].astype(int) - 1
+        tokenized_df["labels"] = tokenized_df["labels"].astype(int)
         logger.info("Finish tokenization")
         return Dataset.from_pandas(tokenized_df)
