@@ -158,4 +158,3 @@ class TrainerModel:
         report_df.to_markdown(result_path_to_save)
         logger.info("Classification Report:")
         logger.info(report_df)
-
