@@ -9,6 +9,7 @@ class FilePath:
     dataset_preprocessed = os.path.join(datasets, "preprocessed")
     datasets_raw = os.path.join(datasets, "raw")
     models = os.path.join(data_path, "models")
+    model_2_classes = os.path.join(models, "model_2_classes")
     plots = os.path.join(data_path, "plots")
     results = os.path.join(data_path, "results")
     classification_report = os.path.join(results, "classification_reports")
@@ -27,16 +28,7 @@ class FilePath:
 
     statistic_rating_before_preprocessing_path = os.path.join(statistics_before, "rating.md")
     statistic_rating_after_preprocessing_path = os.path.join(statistics_after, "rating.md")
-
-    train_raw_rating_value_counts = os.path.join(statistics, "train_raw_rating_value_counts.md")
-    test_raw_rating_value_counts = os.path.join(statistics, "test_raw_rating_value_counts.md")
-    validation_raw_rating_value_counts = os.path.join(statistics, "validation_raw_rating_value_counts.md")
-
-    train_after_spliting_rating_value_counts = os.path.join(statistics, "train_after_spliting_rating_value_counts.md")
-    test_after_spliting_rating_value_counts = os.path.join(statistics, "test_after_spliting_rating_value_counts.md")
-    validation_after_spliting_rating_value_counts = os.path.join(
-        statistics, "validation_after_spliting_rating_value_counts.md"
-    )
+    statistic_rating_after_change_label_path = os.path.join(statistics_after, "rating_after_change_label.md")
 
     classification_report_path = os.path.join(classification_report, "classification_report.md")
 
@@ -44,6 +36,7 @@ class FilePath:
     for directory in [
         data_path,
         models,
+        model_2_classes,
         datasets,
         datasets_raw,
         dataset_preprocessed,

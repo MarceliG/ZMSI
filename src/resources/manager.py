@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
-from transformers import BertForSequenceClassification
+from transformers import AutoModelForSequenceClassification
 
 from src.config import FilePath
 from src.logs import logger
@@ -86,7 +86,7 @@ def save_dataframe_as_markdown(statistics_df: pd.DataFrame, filename: str) -> No
     statistics_df.to_markdown(os.path.join(FilePath.statistics, filename))
 
 
-def load_model_from_disc(path: str) -> BertForSequenceClassification:
+def load_model_from_disc(path: str) -> AutoModelForSequenceClassification:
     """
     Load a pre-trained BERT model for sequence classification from the specified directory.
 
@@ -97,6 +97,6 @@ def load_model_from_disc(path: str) -> BertForSequenceClassification:
         BertForSequenceClassification: The loaded BERT model ready for sequence classification.
     """
     logger.info("Loading model...")
-    model = BertForSequenceClassification.from_pretrained(path)
+    model = AutoModelForSequenceClassification.from_pretrained(path)
     logger.info("Model loaded")
     return model
