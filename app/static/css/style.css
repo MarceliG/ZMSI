@@ -7,31 +7,14 @@
     width: 800px;
 }
 
-
-
-
-.star-rating {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: center;
-}
-
-.star-rating input {
-    display: none;
-}
-
-.star-rating label {
+.like, .unlike {
     font-size: 2rem;
-    color: #ddd;
-    cursor: pointer;
-    transition: color 0.3s;
 }
 
-.star-rating input:checked ~ label {
-    color: #ffc107;
+.like {
+    color: green;
 }
 
-.star-rating label:hover,
-.star-rating label:hover ~ label {
-    color: #ffca28;
+.unlike {
+    color: red;
 }

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}AI - ZSMI{% endblock %}
 
 {% block content %}
     <!-- Title -->
@@ -21,7 +21,7 @@
     <!-- About -->
     <div class="py-5 text-white">
         <h2 class="h3 text-white">Opis</h2>
-         <p>
+        <p>
             Wieszak na klucze to obowiązkowy element wyposażenia każdego domu i mieszkania! Nadaje się nie tylko na klucze, ale też na ubrania, 
             biżuterię i inne przedmioty codziennego użytku. W ten sposób pozostaniesz zorganizowany niezależnie od tego, czy idziesz do pracy, 
             czy na spacer po parku. Wszystkie najpotrzebniejsze rzeczy będą w jednym miejscu i unikniesz szukania ich w pośpiechu przed wyjściem z domu. 
@@ -34,37 +34,112 @@
         <h2 class="h3 text-white">Komentarze</h2>
 
         <div class="form-floating">
-            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
-            <label for="floatingTextarea" class="text-dark">Dodaj komentarz</label>
-            <button class="btn btn-secondary mt-2">Dodaj</button>
+            <textarea class="form-control" placeholder="Leave a comment here" id="comment_input"></textarea>
+            <label for="input_comment" class="text-dark">Dodaj komentarz</label>
+            <button id="comment_add_btn" class="btn btn-secondary mt-2">Dodaj</button>
         </div>
 
-        <div id="all_comments" class="mt-5 mb-5 px-2">
-            <div class="row bg-light text-dark py-2 rounded">
-                <div class="col-10">
-                    <p>Test</p>
-                </div>
-
-                <div class="col-2">
-                    <div class="star-rate star-rating text-dark">
-                        <input type="radio" disabled id="star5" name="rating" value="5">
-                        <label for="star5" title="5 stars">★</label>
-                
-                        <input type="radio" disabled id="star4" name="rating" value="4">
-                        <label for="star4" title="4 stars">★</label>
-                
-                        <input type="radio" checked disabled id="star3" name="rating" value="3">
-                        <label for="star3" title="3 stars">★</label>
-                
-                        <input type="radio" disabled id="star2" name="rating" value="2">
-                        <label for="star2" title="2 stars">★</label>
-                
-                        <input type="radio" disabled id="star1" name="rating" value="1">
-                        <label for="star1" title="1 star">★</label>
-                    </div>
-                </div>
+        <!-- List of comments -->
+        <div id="comments_all_summary" class="d-none justify-content-end flex-row gap-2">
+            <div class="bg-light px-3 rounded pt-2 mt-2">
+                <i class="like fa-regular fa-thumbs-up"></i>
+                <p id="comments_all_summary_like" class="text-dark mt-2 fw-bold">0%</p>
             </div>
+
+            <div class="bg-light px-3 rounded pt-2 mt-2">
+                <i class="unlike fa-regular fa-thumbs-down"></i>
+                <p id="comments_all_summary_unlike" class="text-dark mt-2 fw-bold">0%</p>
+            </div>
+        </div>
+        <div id="comments_all" class="my-5 px-2">
+            <h3 class="text-center">=| Brak komentarzy |=</h3>
         </div>
         
     </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    const input_comment = $('#comment_input'); // text from user
+    const add_comment_btn = $('#comment_add_btn'); // button for add comment
+    const all_comments = $('#comments_all'); // list of comments
+
+    const comments_all_summary = $('#comments_all_summary'); // summary block with % positive and negative comments
+    const comments_all_summary_like = $('#comments_all_summary_like'); // % positive comments
+    const comments_all_summary_unlike = $('#comments_all_summary_unlike'); // % negative comments
+
+    /**
+     * Show summary for user
+    */
+    const show_summary = () => {
+        comments_all_summary.removeClass('d-none');
+        comments_all_summary.addClass('d-flex');
+    }
+
+    /**
+     * Count all comments
+    */
+    const count_comments = () => {
+        return all_comments.find('.comment').length;
+    }
+
+    /**
+     * Count % positive and negative summary comments and after that show user results
+    */
+    const count_summary_comments = () => {
+        const count_like = all_comments.find('.like').length;
+        const count_unlike = all_comments.find('.unlike').length;
+        const total_comments = count_comments();
+
+        // Calculate percentages
+        const percent_like = total_comments > 0 ? (count_like / total_comments * 100).toFixed(0) : 0;
+        const percent_unlike = total_comments > 0 ? (count_unlike / total_comments * 100).toFixed(0) : 0;
+
+        // Update input fields or other elements
+        comments_all_summary_like.text(`${percent_like}%`);
+        comments_all_summary_unlike.text(`${percent_unlike}%`);
+    }
+
+    add_comment_btn.on('click', function() {
+        // Ensure the CSRF token is included
+        const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+
+        $.LoadingOverlay("show");
+
+        // Perform AJAX request
+        $.ajax({
+            url: "{% url 'add_comment' %}",
+            method: "POST",
+            dataType: "JSON",
+            headers: {
+                "X-CSRFToken": csrfToken,
+            },
+            data: {
+                text: input_comment.val()
+            },
+            success: function ({ status, message, result }) {
+                if (status === 'ok') {
+                    input_comment.val('');
+
+                    if(!count_comments()) {
+                        show_summary();
+                        all_comments.html(result);
+                    } else {
+                        all_comments.append(result);
+                    }
+
+                    count_summary_comments();
+                } else {
+                    alert(message);
+                }
+                
+                $.LoadingOverlay("hide");
+            },
+            error: function () {
+                alert('Error');
+                $.LoadingOverlay("hide");
+            }
+        });
+    });
+</script>
 {% endblock %}
