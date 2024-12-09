@@ -1,8 +1,8 @@
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 
-def index(request) -> HttpResponse:
+def index(request: HttpRequest) -> HttpResponse:
     """
     Show index page.
 

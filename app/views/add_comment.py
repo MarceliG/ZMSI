@@ -1,7 +1,7 @@
 import os
 import sys
 
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 from django.template.loader import render_to_string
 
 # Main path
@@ -12,10 +12,10 @@ sys.path.append(BASE_DIR)
 MODEL_PATH = os.path.join(BASE_DIR, "data", "models", "model_2_classes")
 sys.path.append(MODEL_PATH)
 
-from src import predict_class
+from src import predict_class  # noqa: E402
 
 
-def add_comment(request) -> JsonResponse:
+def add_comment(request: HttpRequest) -> JsonResponse:
     """
     Add a comment.
 
