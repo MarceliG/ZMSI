@@ -17,3 +17,7 @@ Before pushing any code to a remote repository, check locally if everything is f
 Run application:
 
 `poetry run python3 main.py`
+
+Run web application
+
+`poetry run python3 app/manage.py runserver`
