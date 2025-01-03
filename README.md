@@ -14,6 +14,12 @@ Before pushing any code to a remote repository, check locally if everything is f
 2. `poetry run ruff format --diff`
 3. `poetry run mypy .`
 
-Run application:
+## Run application:
 
 `poetry run python3 main.py`
+
+## Run web application
+
+To launch the application, create a .env file based on the .env.example file in the "app" directory and then set the SECRET_KEY variable.
+
+`poetry run python3 ./app/manage.py runserver`
